@@ -36,13 +36,19 @@ int main(int argc, char const* argv[])
 			res << "Hello world";
    			res.onComplete();	
 		});
-        mux.handle("/thread")
-                .get([&tg](served::response & res, const served::request & req) {
-                        tg.run([&res, &req]() {
+    mux.handle("/thread")
+        .get([&tg](served::response & res, const served::request & req) {
+            tg.run([&res, &req]() {
 				res << "Hello world thread";
-                        	res.onComplete();
+            	res.onComplete();
 			});
-                });
+        });
+    mux.handle("/file")
+    	.get([](served::response & res, const served::request & req) {
+    		AsyncFile af = AsyncFileManager::createFile("hello.html");
+    		res.subscribe(af);
+    		af.start();
+    	});
 	std::cout << "Try this example with:" << std::endl;
 	std::cout << " curl http://localhost:8123/hello" << std::endl;
 
