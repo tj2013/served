@@ -45,9 +45,9 @@ int main(int argc, char const* argv[])
         });
     mux.handle("/file")
     	.get([](served::response & res, const served::request & req) {
-    		AsyncFile af = AsyncFileManager::createFile("hello.html");
-    		res.subscribe(af);
-    		af.start();
+    		AsyncFile pAf = AsyncFileManager::createFile("hello.html");
+    		pAf->addObserver(&res);
+    		pAf->startRead();
     	});
 	std::cout << "Try this example with:" << std::endl;
 	std::cout << " curl http://localhost:8123/hello" << std::endl;

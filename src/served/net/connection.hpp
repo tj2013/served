@@ -44,7 +44,7 @@ class connection_manager;
  * A connection is created by the server each time a new client connects.
  */
 class connection
-	: public std::enable_shared_from_this<connection>
+	: public std::enable_shared_from_this<connection>		
 {
 public:
 	enum status_type { READING = 0, PROCESSING, WRITING, DONE };

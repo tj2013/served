@@ -8,7 +8,7 @@ namespace served { namespace async {
 
     class AsyncFileManager {
     public:
-        static AsyncFile * create();
+        AsyncFile * create(char * const);
     private:
         uv_loop_t m_loop;
     };

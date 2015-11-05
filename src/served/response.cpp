@@ -166,4 +166,14 @@ response::stock_reply(int status_code, response & res)
 	}
 }
 
+void response::onData(char * const data, unsigned long len)
+{
+	_body.write(data, len);
+}
+
+void response::onEnd()
+{
+	onComplete();
+} 
+
 } // served

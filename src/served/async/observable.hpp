@@ -7,7 +7,7 @@ namespace served { namespace async {
 
 class Observable {
 public:
-    virtual subscribe(Observer * pObserver) = 0;
+    virtual void subscribe(Observer * pObserver) = 0;
 };
 
 }}

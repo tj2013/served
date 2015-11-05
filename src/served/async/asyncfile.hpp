@@ -16,19 +16,23 @@ namespace served { namespace async {
 
     class AsyncFile: public Observable {
     public:
-        virtual subscribe(Observer & _observer) {
-            m_Observer = _observer;
+        virtual addObserver(Observer * _pObserver) {
+            m_pObserver = _pObserver;
         }
         AsyncFile(char * const filename, uv_loop_t loop):
             m_filename(filename),
             m_loop(loop),
-            pObserver(nullptr)
+            m_pObserver(nullptr)
         {
 
         }
+        
         void startRead();
+
+        void close();
+        
     private:
-        Observer * pObserver;
+        Observer * m_pObserver;
         uv_loop_t & m_loop;
         int m_file_discriptor;
         uv_fs_t m_file_request;

@@ -12,15 +12,22 @@ using namespace served::async;
 void AsyncFile::startRead() {
     m_file_discriptor = uv_fs_open(&m_loop, &m_file_request, m_filename.c_str(), O_RDONLY, 0, NULL);
     uv_pipe_init(&m_loop, &(m_file_pipe_wrapper.m_pipe), 0);
-    uv_pipe_open(&m_file_pipe, m_file_discriptor);
+    uv_pipe_open(&(m_file_pipe_wrapper.m_pipe), m_file_discriptor);
     m_file_pipe_wrapper.m_pAsyncFile = this;
     uv_read_start((uv_stream_t*) &(m_file_pipe_wrapper.m_pipe), alloc_buffer, read_callback);
 }
 
 void AsyncFile::close() {
     uv_close((uv_handle_t *)&(m_file_pipe_wrapper.m_pipe), NULL);
+    //Is it necessary to clear those?
+    uv_fs_t close_req;
+    uv_fs_close(&m_loop, &close_req, m_file_request.result, NULL);
+    uv_fs_req_cleanup(&close_req);
+    uv_fs_req_cleanup(&m_file_request);
+    //
     pAsyncFile->m_pObserver->onEnd();
 }
+
 //static
 void AsyncFile::alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf) {
     *buf = uv_buf_init((char*) malloc(suggested_size), suggested_size);
