@@ -10,7 +10,8 @@
 using namespace served::async;
 
 void AsyncFile::startRead() {
-    m_file_discriptor = uv_fs_open(&m_loop, &m_file_request, m_filename.c_str(), O_RDONLY, 0, NULL);
+    m_file_discriptor = uv_fs_open(&m_loop, &m_file_open_request, m_filename.c_str(), O_RDONLY, 0, NULL);
+    //callback == NULL, synchrounous, return req->result, the file handle
     uv_pipe_init(&m_loop, &(m_file_pipe_wrapper.m_pipe), 0);
     uv_pipe_open(&(m_file_pipe_wrapper.m_pipe), m_file_discriptor);
     m_file_pipe_wrapper.m_pAsyncFile = this;
@@ -18,14 +19,13 @@ void AsyncFile::startRead() {
 }
 
 void AsyncFile::close() {
+    auto self(shared_from_this());
+
     uv_close((uv_handle_t *)&(m_file_pipe_wrapper.m_pipe), NULL);
-    //Is it necessary to clear those?
-    uv_fs_t close_req;
-    uv_fs_close(&m_loop, &close_req, m_file_request.result, NULL);
-    uv_fs_req_cleanup(&close_req);
-    uv_fs_req_cleanup(&m_file_request);
-    //
+    //uv_fs_close is not needed, close pipe also close the file
+    //uv_fs_req_cleanup not needed in sync call
     pAsyncFile->m_pObserver->onEnd();
+    m_manager.remove(shared_from_this());
 }
 
 //static

@@ -82,10 +82,8 @@ connection::stop()
 void
 connection::do_read()
 {
-	auto self(shared_from_this());
-
 	_socket.async_read_some(boost::asio::buffer(_buffer.data(), _buffer.size()),
-		[this, self](boost::system::error_code ec, std::size_t bytes_transferred) {
+		[this](boost::system::error_code ec, std::size_t bytes_transferred) {
 			if (!ec)
 			{
 				request_parser_impl::status_type result;
@@ -97,8 +95,8 @@ connection::do_read()
 
 					_read_timer.cancel();
 					_status = status_type::PROCESSING;
-					_response.onComplete = [this, self]() {this->do_write_1();};
-					m_tg.run([this, self]()
+					_response.onComplete = [this]() {this->do_write_1();};
+					m_tg.run([this]()
 					{
 						try
 						{
@@ -162,7 +160,9 @@ connection::do_read()
 void
 connection::do_write()
 {
-	auto self(shared_from_this());
+	auto self(shared_from_this()); 
+	//why? When call _connection_manager.stop, the shared_ptr contain this will be erased
+	//create a shared_ptr to prevent the object being released
 
 	boost::asio::async_write(_socket, boost::asio::buffer(_response.to_buffer()),
 		[this, self](boost::system::error_code ec, std::size_t) {

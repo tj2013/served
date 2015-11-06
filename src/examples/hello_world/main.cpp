@@ -31,6 +31,8 @@ int main(int argc, char const* argv[])
 {
 	served::multiplexer mux;
 	tbb::task_group  tg;
+	AsyncFileManager afManager;
+
 	mux.handle("/hello")
 		.get([](served::response & res, const served::request & req) {
 			res << "Hello world";
@@ -45,9 +47,9 @@ int main(int argc, char const* argv[])
         });
     mux.handle("/file")
     	.get([](served::response & res, const served::request & req) {
-    		AsyncFile pAf = AsyncFileManager::createFile("hello.html");
-    		pAf->addObserver(&res);
-    		pAf->startRead();
+    		AsyncFile & af = afManager.createFile("hello.html");
+    		af.addObserver(&res);
+    		af.startRead();
     	});
 	std::cout << "Try this example with:" << std::endl;
 	std::cout << " curl http://localhost:8123/hello" << std::endl;
