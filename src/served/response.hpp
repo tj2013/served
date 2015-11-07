@@ -43,7 +43,7 @@ namespace served {
  * to a request. This class is used to simplify the method of composing an
  * appropriate response to a request.
  */
-class response : public served::async::Observer
+class response
 {
 	typedef std::tuple<std::string, std::string> header_pair;
 	typedef std::map<std::string, header_pair>   header_list;
@@ -142,9 +142,8 @@ public:
 
 	std::function<void()> onComplete;
 
-	virtual void onData(char * const data, unsigned long len);
+	void onData(char * const data, unsigned long len);
 
-    virtual void onEnd(); 
 };
 
 } // served

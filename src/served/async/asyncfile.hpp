@@ -4,44 +4,52 @@
 #include <memory>
 #include <string>
 #include <uv.h>
-#include "observable.hpp"
 
 namespace served { namespace async {
 
-    class AsyncFile;
+class AsyncFile;
+class AsyncFileManager;
 
-    struct PipeWrapper {
-        uv_pipe_t m_pipe;
-        AsyncFile * m_pAsyncFile;
-    };
+struct PipeWrapper {
+    uv_pipe_t m_pipe;
+    AsyncFile * m_pAsyncFile;
+};
 
-    class AsyncFile: public Observable, public std::enable_shared_from_this<AsyncFile>  {
-    public:
-        virtual addObserver(Observer * _pObserver) {
-            m_pObserver = _pObserver;
-        }
-        AsyncFile(char * const filename, uv_loop_t & loop, AsyncFileManager & manager):
-            m_filename(filename),
-            m_loop(loop),
-            m_pObserver(nullptr),
-            m_manager(manager)
-        {
+class AsyncFile: public std::enable_shared_from_this<AsyncFile>  {
+public:
 
-        }
-        
-        void startRead();
+    AsyncFile(const AsyncFile&) = delete;
 
-        void close();
-        
-    private:
-        Observer * m_pObserver;
-        uv_loop_t & m_loop;
-        int m_file_discriptor;
-        uv_fs_t m_file_open_request;
-        std::string m_filename;
-        PipeWrapper m_file_pipe_wrapper;
-        AsyncFileManager & m_manager;
-    };
+    AsyncFile& operator=(const AsyncFile&) = delete;
 
+    explicit AsyncFile(char const *  filename, uv_loop_t & loop, AsyncFileManager & manager):
+        m_filename(filename),
+        m_loop(loop),
+        m_manager(manager)
+    {
+
+    }
     
+    void startRead(
+            const std::function<void(char * const data, unsigned long len)> onData,
+            const std::function<void()> & _onComplete);
+
+    void close();
+    
+private:
+
+    uv_loop_t & m_loop;
+    int m_file_discriptor;
+    uv_fs_t m_file_open_request;
+    std::string m_filename;
+    PipeWrapper m_file_pipe_wrapper;
+    AsyncFileManager & m_manager;
+    static void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
+    static void read_callback(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf);
+    std::function<void(char * const data, unsigned long len)> onData;
+    std::function<void()> onComplete;
+};
+
 }}
+
+#endif

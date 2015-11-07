@@ -22,6 +22,7 @@
 
 #include <served/served.hpp>
 #include <tbb/task_group.h>
+#include <served/async/asyncfile_manager.hpp>
 
 /* hello_world example
  *
@@ -31,7 +32,7 @@ int main(int argc, char const* argv[])
 {
 	served::multiplexer mux;
 	tbb::task_group  tg;
-	AsyncFileManager afManager;
+	served::async::AsyncFileManager afManager;
 
 	mux.handle("/hello")
 		.get([](served::response & res, const served::request & req) {
@@ -46,10 +47,16 @@ int main(int argc, char const* argv[])
 			});
         });
     mux.handle("/file")
-    	.get([](served::response & res, const served::request & req) {
-    		AsyncFile & af = afManager.createFile("hello.html");
-    		af.addObserver(&res);
-    		af.startRead();
+    	.get([&afManager](served::response & res, const served::request & req) {
+    		served::async::AsyncFile & af = afManager.create(std::string("hello.html").c_str());
+    		af.startRead(
+                [&res](char * const data, unsigned long len) {
+                    res.onData(data, len);
+                },    
+                [&res]() {
+                    res.onComplete();
+                }
+            );
     	});
 	std::cout << "Try this example with:" << std::endl;
 	std::cout << " curl http://localhost:8123/hello" << std::endl;

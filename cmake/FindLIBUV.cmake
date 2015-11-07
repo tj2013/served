@@ -32,7 +32,7 @@ find_path(LIBUV_INCLUDE_DIR uv.h NO_DEFAULT_PATH PATHS
   /usr/local/include
 )
 
-set(LIBUV_NAMES ${LIBUV_NAMES} libuv)
+set(LIBUV_NAMES ${LIBUV_NAMES} uv)
 
 find_library(LIBUV_LIBRARY NAMES ${LIBUV_NAMES} NO_DEFAULT_PATH PATHS
   /usr/local/lib

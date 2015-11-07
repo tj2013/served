@@ -2,12 +2,12 @@
 
 using namespace served::async;
 
-AsyncFile & AsyncFileManager::create(char * const filename)
+AsyncFile & AsyncFileManager::create(char const * filename)
 {
-    std::shared_ptr<AsyncFile> spFile = std::make_shared<AsyncFile>(filename, m_loop);
+    std::shared_ptr<AsyncFile> spFile = std::make_shared<AsyncFile>(filename, m_loop, *this);
     {
         std::lock_guard<std::mutex> lock(m_mutex);
-        m_files.insert(c);
+        m_files.insert(spFile);
     }
     return *spFile;
 }
@@ -33,7 +33,7 @@ void AsyncFileManager::init()
     uv_run(&m_loop, UV_RUN_DEFAULT);
 }
 
-~AsyncFileManager::AsyncFileManager()
+AsyncFileManager::~AsyncFileManager()
 {
     uv_timer_stop(&m_timer);
     uv_loop_close(&m_loop);
