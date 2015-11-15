@@ -168,6 +168,7 @@ response::stock_reply(int status_code, response & res)
 
 void response::onData(char * const data, unsigned long len)
 {
+	printf("response data\n");
 	_body.write(data, len);
 }
 

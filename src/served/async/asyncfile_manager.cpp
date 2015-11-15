@@ -12,30 +12,32 @@ AsyncFile & AsyncFileManager::create(char const * filename)
     return *spFile;
 }
 
-void AsyncFileManager::remove(std::shared_ptr<AsyncFile> spFile)
+void AsyncFileManager::remove(std::shared_ptr<AsyncFile> const & spFile)
 {
     std::lock_guard<std::mutex> lock(m_mutex);
     m_files.erase(spFile);
 }
 
-void timer_cb(uv_timer_t* handle)
-{
-    //do nothing
-}
+static int counter = 0;
+static void wait_for_a_while(uv_idle_t* handle) {
+    counter++;
+    if (counter % (1000*1000) == 0)
+    {
+        printf("idle counter = %d", counter);
+    }
+}  
 
 void AsyncFileManager::init()
 {
     uv_loop_init(&m_loop);
 
-    uv_timer_init(&m_loop, &m_timer);
-    uv_timer_start(&m_timer, timer_cb, UINT64_MAX, 1);
-
+    uv_idle_init(&m_loop, &m_idler);
+    uv_idle_start(&m_idler, wait_for_a_while);
     uv_run(&m_loop, UV_RUN_DEFAULT);
 }
 
 AsyncFileManager::~AsyncFileManager()
 {
-    uv_timer_stop(&m_timer);
     uv_loop_close(&m_loop);
 }
 

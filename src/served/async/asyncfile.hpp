@@ -40,14 +40,16 @@ private:
 
     uv_loop_t & m_loop;
     int m_file_discriptor;
-    uv_fs_t m_file_open_request;
+    uv_fs_t m_open_req;
+    uv_fs_t m_read_req;
+    uv_fs_t m_close_req;
     std::string m_filename;
-    PipeWrapper m_file_pipe_wrapper;
     AsyncFileManager & m_manager;
     static void alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
     static void read_callback(uv_stream_t *stream, ssize_t nread, const uv_buf_t *buf);
     std::function<void(char * const data, unsigned long len)> onData;
     std::function<void()> onComplete;
+    uv_buf_t m_buf;
 };
 
 }}

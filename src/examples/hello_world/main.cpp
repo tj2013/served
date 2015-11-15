@@ -20,6 +20,7 @@
  * SOFTWARE.
  */
 
+#include <thread>
 #include <served/served.hpp>
 #include <tbb/task_group.h>
 #include <served/async/asyncfile_manager.hpp>
@@ -33,6 +34,7 @@ int main(int argc, char const* argv[])
 	served::multiplexer mux;
 	tbb::task_group  tg;
 	served::async::AsyncFileManager afManager;
+    std::thread t(&served::async::AsyncFileManager::init, &afManager);
 
 	mux.handle("/hello")
 		.get([](served::response & res, const served::request & req) {
@@ -48,6 +50,7 @@ int main(int argc, char const* argv[])
         });
     mux.handle("/file")
     	.get([&afManager](served::response & res, const served::request & req) {
+            printf("request: file\n");
     		served::async::AsyncFile & af = afManager.create(std::string("hello.html").c_str());
     		af.startRead(
                 [&res](char * const data, unsigned long len) {

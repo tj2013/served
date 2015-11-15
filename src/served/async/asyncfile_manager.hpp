@@ -22,12 +22,12 @@ public:
     {     
     }
     AsyncFile & create(char const *);
-    void remove(std::shared_ptr<AsyncFile> spFile);
+    void remove(std::shared_ptr<AsyncFile> const & spFile);
     void init();
     ~AsyncFileManager();
 private:
     uv_loop_t m_loop;
-    uv_timer_t m_timer;
+    uv_idle_t m_idler;
 };
 
 }}
